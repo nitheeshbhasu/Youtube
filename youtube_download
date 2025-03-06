@@ -2,28 +2,30 @@ import streamlit as st
 import yt_dlp
 import os
 
+# Load custom CSS
+def load_css(file_name):
+    with open(file_name, "r") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+# Load styles.css
+load_css("styles.css")
+
 # Get default Downloads folder
 default_download_path = os.path.join(os.path.expanduser("~"), "Downloads")
 
 
 def download_playlist(url, resolution, download_path):
     ydl_opts = {
-        "format": f"bv*[height={resolution}]+ba/best",  # Select user-defined resolution
-        "merge_output_format": "mp4",  # Ensure MP4 output
+        "format": f"bv*[height={resolution}]+ba/best",
+        "merge_output_format": "mp4",
         "outtmpl": os.path.join(download_path, "%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s"),
-        # Organize into playlist folder
-        "noplaylist": False,  # Allow playlist downloading
-        "retries": 10,  # Retry up to 10 times for failed downloads
-        "fragment_retries": 10,  # Retry failed video fragments
-        "continue": True,  # Resume interrupted downloads
-        "ignoreerrors": True,  # Skip failed videos instead of stopping
-        "buffersize": 16 * 1024,  # Set buffer size to 16 KB for stability
-        "postprocessors": [
-            {
-                "key": "FFmpegVideoConvertor",
-                "preferedformat": "mp4",  # Convert output to MP4
-            }
-        ],
+        "noplaylist": False,
+        "retries": 10,
+        "fragment_retries": 10,
+        "continue": True,
+        "ignoreerrors": True,
+        "buffersize": 16 * 1024,
+        "postprocessors": [{"key": "FFmpegVideoConvertor", "preferedformat": "mp4"}],
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -39,7 +41,7 @@ playlist_url = st.text_input("🔗 Enter YouTube Playlist URL:")
 resolution = st.selectbox(
     "🎚️ Select Video Resolution:",
     ["144", "240", "360", "480", "720", "1080", "1440", "2160"],
-    index=4  # Default to 720p
+    index=4
 )
 
 download_path = st.text_input("📂 Enter Download Folder Path (Optional):", default_download_path)
@@ -47,10 +49,7 @@ download_path = st.text_input("📂 Enter Download Folder Path (Optional):", def
 # ✅ Download Button
 if st.button("🚀 Start Download"):
     if playlist_url:
-        # If no path given, use default Downloads folder
         final_path = download_path if download_path else default_download_path
-
-        # Create folder if it doesn't exist
         if not os.path.exists(final_path):
             os.makedirs(final_path)
 
