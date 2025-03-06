@@ -29,6 +29,7 @@ def download_playlist(url, resolution):
         "continue": True,
         "ignoreerrors": True,
         "buffersize": 16 * 1024,
+        "progress_hooks": [progress_hook],
         "postprocessors": [{"key": "FFmpegVideoConvertor", "preferedformat": "mp4"}],
     }
 
@@ -38,6 +39,11 @@ def download_playlist(url, resolution):
         return video_filename
 
 
+def progress_hook(d):
+    if d['status'] == 'downloading':
+        percent = d['_percent_str']
+        st.write(f"📊 Download Progress: {percent}")
+
 # 🎨 Streamlit UI
 st.title("🎥 YouTube Playlist Downloader 🚀")
 st.subheader("📥 Download your favorite YouTube playlists in any resolution!")
@@ -46,16 +52,16 @@ st.subheader("📥 Download your favorite YouTube playlists in any resolution!")
 playlist_url = st.text_input("🔗 Enter YouTube Playlist URL:")
 resolution = st.selectbox(
     "🎚️ Select Video Resolution:",
-    ["144", "240", "360", "480", "720", "1080", "1440", "2160"],
+    ["144p", "240p", "360p", "480p", "720p", "1080p", "1440p", "2160p"],
     index=4
 )
 
 # ✅ Download Button
 if st.button("🚀 Start Download"):
     if playlist_url:
-        st.write(f"⏳ Downloading in **{resolution}p** resolution... Please wait! 🎬")
+        st.write(f"⏳ Downloading in **{resolution}** resolution... Please wait! 🎬")
         try:
-            video_file = download_playlist(playlist_url, resolution)
+            video_file = download_playlist(playlist_url, resolution[:-1])
             st.success("✅ Download complete! Click below to save it.")
 
             with open(video_file, "rb") as f:
